@@ -287,7 +287,7 @@ graph TB
     end
 
     subgraph External["External"]
-        LLM[OpenAI-compatible LLM endpoint<br/>Groq by default]
+        LLM[Configurable OpenAI-compatible LLM endpoint]
         GOOGLE[Google OAuth 2.0]
     end
 
@@ -331,7 +331,7 @@ graph TB
 | Layer | Technology | Purpose |
 | --- | --- | --- |
 | **Backend** | Python 3.13 · FastAPI | Async API, Pydantic validation, dependency injection |
-| **AI** | OpenAI-compatible SDK → Groq endpoint | Question generation, quality gates, answer evaluation, coaching |
+| **AI** | OpenAI-compatible SDK → configurable LLM endpoint | Question generation, quality gates, answer evaluation, coaching |
 | **Database** | SQLAlchemy 2.0 · SQLite (dev) · PostgreSQL/Neon (prod) | ORM, server-side sessions, attempts, quotas, subscriptions |
 | **Auth** | Google OAuth 2.0 (Identity Services) + httpOnly session cookies | Passwordless sign-in, server-side sessions, suspension enforcement |
 | **Documents** | pypdf | In-memory PDF text extraction with a typed error taxonomy |
@@ -399,7 +399,7 @@ Cram-ai/
 | Requirement | Version | Purpose |
 | --- | --- | --- |
 | **Python** | 3.13 | Runtime (pinned in `pyproject.toml` and `.python-version`) |
-| **Groq API key** | — | Question generation, evaluation, coaching ([sign up free](https://console.groq.com/)) |
+| **LLM API key** | — | Question generation, evaluation, and coaching (use credentials from your chosen LLM provider) |
 | **Google OAuth client ID** | — | Sign-in ([Google Cloud Console](https://console.cloud.google.com/)) — web application type |
 | **Git** | 2.0+ | Version control |
 
@@ -428,12 +428,12 @@ pip install -r requirements.txt        # classic pip
 cp .env.example .env
 ```
 
-Edit `.env` — at minimum set `GROQ_API_KEY` and `GOOGLE_CLIENT_ID`:
+Edit `.env` — at minimum set `LLM_API_KEY` and `GOOGLE_CLIENT_ID`:
 
 ```env
-GROQ_API_KEY=gsk_your_key_here
-GROQ_BASE_URL=https://api.groq.com/openai/v1
-GROQ_MODEL=openai/gpt-oss-120b
+LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=https://your-openai-compatible-llm-endpoint/v1
+LLM_MODEL=your-model-name
 
 GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
 ADMIN_EMAIL=you@example.com            # optional: grants admin access
@@ -478,9 +478,9 @@ All settings come from environment variables (`.env` supported locally via `pyda
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `GROQ_API_KEY` | — | **Required.** API key for the OpenAI-compatible LLM endpoint. |
-| `GROQ_BASE_URL` | `https://api.groq.com/openai/v1` | LLM endpoint (any OpenAI-compatible API works). |
-| `GROQ_MODEL` | `openai/gpt-oss-120b` | Model used for generation, evaluation, and coaching. |
+| `LLM_API_KEY` | — | **Required.** API key for the OpenAI-compatible LLM endpoint. |
+| `LLM_BASE_URL` | `https://your-openai-compatible-llm-endpoint/v1` | LLM endpoint (any OpenAI-compatible API works). |
+| `LLM_MODEL` | `your-model-name` | Model used for generation, evaluation, and coaching. |
 | `GOOGLE_CLIENT_ID` | — | Google OAuth 2.0 web-client ID for sign-in. |
 | `ADMIN_EMAIL` | empty | Verified Google email that receives administrator access. Empty disables admin. |
 | `DATABASE_URL` | `sqlite:///./cram_ai.db` | **Direct** connection. Used by the migration command; request traffic only falls back to it when `DATABASE_URL_POOLED` is unset. |
@@ -665,14 +665,14 @@ Included tests: answer verification, auth and admin guards, database architectur
 
 The repository is deployment-ready: `main.py` exports the FastAPI app as a Python Function, `vercel.json` raises the function timeout to 300 seconds (generation with a past exam can take around a minute), and the frontend is served from the same process.
 
-1. **Create services** — GitHub repo → Vercel project; a managed PostgreSQL database (Neon or similar) with both a **direct** URL (migrations only) and a **pooled** URL (request traffic); a Google OAuth web client with the deployed domain as an authorized JavaScript origin; a Groq API key.
+1. **Create services** — GitHub repo → Vercel project; a managed PostgreSQL database (Neon or similar) with both a **direct** URL (migrations only) and a **pooled** URL (request traffic); a Google OAuth web client with the deployed domain as an authorized JavaScript origin; an API key from your chosen LLM provider.
 2. **Set environment variables** for Production, Preview, and Development:
 
    | Variable | Value |
    | --- | --- |
    | `DATABASE_URL` | PostgreSQL **direct** URL — used only by the migration command |
    | `DATABASE_URL_POOLED` | PostgreSQL **pooled** URL — used by the application |
-   | `GROQ_API_KEY` / `GROQ_BASE_URL` / `GROQ_MODEL` | AI provider credentials |
+   | `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | AI provider credentials |
    | `GOOGLE_CLIENT_ID` | Google OAuth web client ID |
    | `ADMIN_EMAIL` | Email to receive administrator privileges |
    | `CORS_ORIGINS` | Exact deployed origin(s), comma-separated |
@@ -767,7 +767,7 @@ No. The past exam is a *style reference only*. Similarity, groundedness, and amb
 Topic-only papers are usually ready in under 30 seconds. With a past exam attached, expect about a minute — and you watch the progress stream live.
 
 **Can I self-host it?**
-Absolutely. Docker is supported, and any OpenAI-compatible LLM endpoint can be configured via `GROQ_BASE_URL` / `GROQ_MODEL`.
+Absolutely. Docker is supported, and any OpenAI-compatible LLM endpoint can be configured via `LLM_BASE_URL` / `LLM_MODEL`.
 
 **Does it work offline?**
 Not currently — generation and grading call an LLM API. Offline cached decks are on the roadmap.
@@ -793,7 +793,7 @@ Cram AI is released under the **[MIT License](https://opensource.org/licenses/MI
 
 **Made by [Marvin AI Technologies](https://github.com/yeabsiragebre/Cram-ai)** — inspired by Marvin Minsky's pioneering work in AI, building intelligent software that makes complex tasks simpler, more efficient, and accessible. *Marvin AI Technologies. Building useful intelligence.*
 
-Built with [FastAPI](https://fastapi.tiangolo.com/), [SQLAlchemy](https://www.sqlalchemy.org/), [Pydantic](https://docs.pydantic.dev/), [pypdf](https://pypdf.readthedocs.io/), [Groq](https://groq.com/), [Neon](https://neon.tech/), [Google Identity Services](https://developers.google.com/identity), and [Vercel](https://vercel.com/).
+Built with [FastAPI](https://fastapi.tiangolo.com/), [SQLAlchemy](https://www.sqlalchemy.org/), [Pydantic](https://docs.pydantic.dev/), [pypdf](https://pypdf.readthedocs.io/), your chosen OpenAI-compatible LLM provider, [Neon](https://neon.tech/), [Google Identity Services](https://developers.google.com/identity), and [Vercel](https://vercel.com/).
 
 ---
 
