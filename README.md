@@ -9,7 +9,7 @@
 <div align="center">
 
 <img
-  src="./assets/cram-logo.svg"
+  src="./frontend/assets/cram-logo.svg"
   width="96"
   height="96"
   alt="Cram AI logo"
