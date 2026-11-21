@@ -10,8 +10,8 @@
 
 <img
   src="./frontend/assets/cram-logo.svg"
-  width="96"
-  height="96"
+  width="150"
+  height="150"
   alt="Cram AI logo"
   style="border-radius: 50%; object-fit: cover;"
 />
