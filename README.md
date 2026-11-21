@@ -8,7 +8,13 @@
 
 <div align="center">
 
-<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%2312110E'/%3E%3Cpath d='M36.26 13.71A16 16 0 1 0 36.26 34.29' fill='none' stroke='%23EFE9DD' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='40' cy='24' r='3.4' fill='%23B99AFF'/%3E%3C/svg%3E" width="96" height="96" alt="Cram AI logo">
+<img
+  src="./assets/cram-logo.svg"
+  width="96"
+  height="96"
+  alt="Cram AI logo"
+  style="border-radius: 50%; object-fit: cover;"
+/>
 
 # Cram AI
 
